@@ -45,13 +45,25 @@ echo "Installing Detectron2 without build isolation ..."
 python -m pip install --no-build-isolation \
   "git+https://github.com/facebookresearch/detectron2.git"
 
-# Install the project's base dependencies. PHALP is intentionally excluded
-# from requirements.txt to prevent pip from rebuilding Detectron2.
+# Install base dependencies first. PHALP, Chumpy and 4D-Humans are excluded
+# from requirements.txt so their legacy Git dependencies cannot trigger
+# isolated rebuilds of already installed packages.
 echo "Installing base requirements ..."
 python -m pip install -r requirements.txt
 
-# Detectron2 and the other base dependencies are already installed, so install
-# PHALP itself without resolving its dependency list again.
+# Chumpy's legacy build metadata is not compatible with modern isolated pip
+# builds. Build it in the current environment instead.
+echo "Installing Chumpy without build isolation ..."
+python -m pip install --no-build-isolation \
+  "git+https://github.com/mattloper/chumpy"
+
+# Install 4D-Humans itself without resolving Chumpy again.
+echo "Installing 4D-Humans without dependency resolution ..."
+python -m pip install --no-deps \
+  "git+https://github.com/miu200521358/4D-Humans.git"
+
+# Detectron2 and base dependencies are already installed. Install PHALP itself
+# without resolving Detectron2 again.
 echo "Installing PHALP without dependency resolution ..."
 python -m pip install --no-deps \
   "git+https://github.com/miu200521358/PHALP.git"
@@ -61,9 +73,11 @@ python - <<'PY'
 import torch
 import detectron2
 import phalp
+import hmr2
 print("PyTorch OK:", torch.__version__)
 print("Detectron2 OK")
 print("PHALP OK")
+print("HMR2 OK")
 PY
 
 echo "============================================================"

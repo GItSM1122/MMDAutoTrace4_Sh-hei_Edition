@@ -28,7 +28,9 @@ except Exception as e:
     print("PyTorch check failed:", e)
 PY
 
-python -m pip install --upgrade pip setuptools wheel
+# PyTorch 2.11 requires setuptools < 82.
+# Do not upgrade setuptools without an upper bound on current Colab runtimes.
+python -m pip install --upgrade pip wheel "setuptools<82"
 
 if [[ ! -f requirements.txt ]]; then
     echo "ERROR: requirements.txt not found: $PROJECT_DIR/requirements.txt"

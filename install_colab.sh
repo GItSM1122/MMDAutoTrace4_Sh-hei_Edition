@@ -40,14 +40,31 @@ if [[ ! -f requirements.txt ]]; then
     exit 1
 fi
 
-# Install Detectron2 first without pip build isolation so the build can see
-# the PyTorch already provided by the Colab runtime.
+# Detectron2 must be built against the PyTorch already provided by Colab.
 echo "Installing Detectron2 without build isolation ..."
 python -m pip install --no-build-isolation \
   "git+https://github.com/facebookresearch/detectron2.git"
 
-echo "Installing requirements.txt ..."
+# Install the project's base dependencies. PHALP is intentionally excluded
+# from requirements.txt to prevent pip from rebuilding Detectron2.
+echo "Installing base requirements ..."
 python -m pip install -r requirements.txt
+
+# Detectron2 and the other base dependencies are already installed, so install
+# PHALP itself without resolving its dependency list again.
+echo "Installing PHALP without dependency resolution ..."
+python -m pip install --no-deps \
+  "git+https://github.com/miu200521358/PHALP.git"
+
+echo "Verifying core imports ..."
+python - <<'PY'
+import torch
+import detectron2
+import phalp
+print("PyTorch OK:", torch.__version__)
+print("Detectron2 OK")
+print("PHALP OK")
+PY
 
 echo "============================================================"
 echo "Base Colab installation completed."
